@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,20 +77,29 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
+            0% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.5;
+            }
         }
-        
+
         .error {
             color: #ff3333;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <h1>System Status: Online</h1>
-        
+        <h1>SYSTEM STATUS: CI/CD FULLY AUTOMATED 🚀</h1>
+
         <div class="status-box">
             <div class="label">Backend Container ID</div>
             <div class="data" id="hostname">Scanning...</div>
@@ -114,11 +124,11 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                
+
                 // Update DOM with animation effect if changed (simplified here)
                 hostnameEl.textContent = data.hostname;
                 ipEl.textContent = data.ip;
-                
+
                 hostnameEl.classList.remove('error');
             } catch (error) {
                 console.error('Fetch error:', error);
@@ -130,9 +140,10 @@
 
         // Poll every 2 seconds
         setInterval(fetchData, 2000);
-        
+
         // Initial fetch
         fetchData();
     </script>
 </body>
+
 </html>
