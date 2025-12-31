@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Microservices Visualizer</title>
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00ff;
+            --bg-color: #050510;
+            --card-bg: #1a1a2e;
+            --text-color: #e0e0e0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: var(--card-bg);
+            padding: 2rem 4rem;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: var(--neon-blue);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .status-box {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            border: 1px solid var(--neon-pink);
+            border-radius: 8px;
+            background: rgba(255, 0, 255, 0.05);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.1) inset;
+        }
+
+        .label {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .data {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        .refresh-indicator {
+            font-size: 0.8rem;
+            margin-top: 1rem;
+            color: var(--neon-blue);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        
+        .error {
+            color: #ff3333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>System Status: Online</h1>
+        
+        <div class="status-box">
+            <div class="label">Backend Container ID</div>
+            <div class="data" id="hostname">Scanning...</div>
+        </div>
+
+        <div class="status-box">
+            <div class="label">Internal IP Address</div>
+            <div class="data" id="ip">---</div>
+        </div>
+
+        <div class="refresh-indicator">SYNCING LIVE DATA...</div>
+    </div>
+
+    <script>
+        const hostnameEl = document.getElementById('hostname');
+        const ipEl = document.getElementById('ip');
+
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                // Update DOM with animation effect if changed (simplified here)
+                hostnameEl.textContent = data.hostname;
+                ipEl.textContent = data.ip;
+                
+                hostnameEl.classList.remove('error');
+            } catch (error) {
+                console.error('Fetch error:', error);
+                hostnameEl.textContent = "OFFLINE";
+                hostnameEl.classList.add('error');
+                ipEl.textContent = "---";
+            }
+        }
+
+        // Poll every 2 seconds
+        setInterval(fetchData, 2000);
+        
+        // Initial fetch
+        fetchData();
+    </script>
+</body>
+</html>
