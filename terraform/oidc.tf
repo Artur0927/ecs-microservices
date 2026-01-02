@@ -72,7 +72,7 @@ resource "aws_iam_role_policy_attachment" "github_build_terraform_state" {
 
 # -----------------------------------------------------------------------------
 # Role 2: Deploy (For Image Push & ECS Updates)
-# Trust Policy: RESTRICTED to refs/heads/main only
+# Trust Policy: RESTRICTED to main branch and production environment only
 # -----------------------------------------------------------------------------
 resource "aws_iam_role" "github_deploy" {
   name = "github-actions-deploy-role"
@@ -88,7 +88,25 @@ resource "aws_iam_role" "github_deploy" {
         }
         Condition = {
           StringEquals = {
-            "token.actions.githubusercontent.com:sub" : "repo:Artur0927/ecs-microservices:ref:refs/heads/main"
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          }
+          StringLike = {
+            "token.actions.githubusercontent.com:sub" = "repo:Artur0927/ecs-microservices:ref:refs/heads/main"
+          }
+        }
+      },
+      {
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Effect = "Allow"
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.github.arn
+        }
+        Condition = {
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          }
+          StringLike = {
+            "token.actions.githubusercontent.com:sub" = "repo:Artur0927/ecs-microservices:environment:production"
           }
         }
       }
