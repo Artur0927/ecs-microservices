@@ -36,9 +36,12 @@ Deployed on **AWS ECS Fargate**, providing a secure, serverless runtime for cont
 ## CI/CD Automation
 
 A robust **GitHub Actions** pipeline implements enterprise patterns:
+-   **Pull Request Workflow**: CI pipeline triggers on pull requests for validation (builds images without pushing).
+-   **Merge-Based Deployment**: Deployment automatically triggers when pull requests are merged to `main`, ensuring code review before production.
 -   **Docker Layer Caching**: Optimized build times using `gha` cache backend.
 -   **Immutable Tagging**: Images tagged with both `latest` and `git-sha` for auditability and rapid rollbacks.
--   **Automated Deployment**: Direct integration with ECS for immediate updates.
+-   **Automated Deployment**: Direct integration with ECS for immediate updates on merge.
+-   **Manual Terraform**: Infrastructure changes are managed through manual workflow dispatch for controlled deployments.
 
 ![CI/CD Pipeline](screenshots/gitgubcocd.jpg)
 
@@ -96,8 +99,26 @@ A robust **GitHub Actions** pipeline implements enterprise patterns:
     ```
 
 4.  **Continuous Deployment:**
-    Pushing to the `main` branch will automatically trigger the CI/CD pipeline, building new Docker images and forcing a deployment update in ECS.
-
+    The CI/CD pipeline automatically triggers on pull requests:
+    - **On Pull Request**: Builds Docker images locally for validation (no deployment)
+    - **On Merge to Main**: Builds, pushes images to ECR, and deploys to ECS automatically
+    
+    Workflow:
     ```bash
-    git push origin main
+    # Create a feature branch and make changes
+    git checkout -b feature/my-feature
+    git add .
+    git commit -m "Add new feature"
+    git push origin feature/my-feature
+    
+    # Create a pull request on GitHub
+    # CI will run and validate the build
+    
+    # After merging the PR to main, deployment happens automatically
     ```
+
+5.  **Infrastructure Management:**
+    Terraform changes are managed manually through GitHub Actions workflow dispatch:
+    - Navigate to Actions → "Manual Terraform" workflow
+    - Select environment and action (plan/apply)
+    - Confirm with "APPLY" for apply operations
