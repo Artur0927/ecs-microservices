@@ -4,7 +4,7 @@ resource "random_id" "bucket_suffix" {
 
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "${var.project_name}-terraform-state-${random_id.bucket_suffix.hex}"
-  
+
   force_destroy = true # Allow destroying bucket even if not empty (convenience for this lab)
 
   tags = {

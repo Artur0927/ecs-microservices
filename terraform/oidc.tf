@@ -120,7 +120,7 @@ resource "aws_iam_policy" "github_deploy_least_privilege" {
           "ecr:UploadLayerPart",
           "ecr:CompleteLayerUpload"
         ]
-        Effect   = "Allow"
+        Effect = "Allow"
         Resource = [
           aws_ecr_repository.backend.arn,
           aws_ecr_repository.frontend.arn
@@ -132,7 +132,7 @@ resource "aws_iam_policy" "github_deploy_least_privilege" {
           "ecs:UpdateService",
           "ecs:DescribeServices"
         ]
-        Effect   = "Allow"
+        Effect = "Allow"
         Resource = [
           aws_ecs_service.backend.id,
           aws_ecs_service.frontend.id
