@@ -30,7 +30,9 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  ROLE_TO_ASSUME: arn:aws:iam::577713924485:role/github-actions-role
+  # Manual Terraform always runs from a privileged context (Deploy Role)
+  # But requires branch restriction in Trust Policy (refs/heads/main)
+  ROLE_TO_ASSUME: arn:aws:iam::577713924485:role/github-actions-deploy-role
   TF_VERSION: 1.6.0
 
 jobs:
