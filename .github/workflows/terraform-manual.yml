@@ -30,15 +30,15 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  # Manual Terraform always runs from a privileged context (Deploy Role)
-  # But requires branch restriction in Trust Policy (refs/heads/main)
-  ROLE_TO_ASSUME: arn:aws:iam::577713924485:role/github-actions-deploy-role
+  ROLE_TO_ASSUME: arn:aws:iam::577713924485:role/github-actions-terraform-role
   TF_VERSION: 1.6.0
 
 jobs:
   terraform:
     name: Terraform ${{ inputs.action }}
     runs-on: ubuntu-latest
+    # Added branch check for workflow_dispatch from main
+    if: github.ref == 'refs/heads/main'
     defaults:
       run:
         working-directory: ./terraform
