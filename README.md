@@ -5,6 +5,8 @@
 
 Production-grade microservices architecture on AWS ECS Fargate with Infrastructure as Code (Terraform) and automated CI/CD pipelines using GitHub Actions.
 
+**Author:** Artur Martirosyan
+
 ## Project Overview
 
 This project demonstrates a complete cloud-native microservices deployment:
