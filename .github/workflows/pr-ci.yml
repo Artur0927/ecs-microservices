@@ -37,7 +37,7 @@ jobs:
       - name: Run Backend Tests
         working-directory: ./backend
         run: |
-          pytest test_main.py -v --cov=app --cov-report=xml || pytest test_main.py -v
+          python -m pytest test_main.py -v --cov=app --cov-report=xml || python -m pytest test_main.py -v
 
   docker-build:
     name: Build Docker Images
@@ -83,6 +83,12 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      - name: Configure AWS Credentials (Read-Only)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_BUILD_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
 
@@ -91,12 +97,6 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
-
-      - name: Configure AWS Credentials (Read-Only)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ env.AWS_BUILD_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Plan
         run: terraform plan -no-color -out=tfplan
