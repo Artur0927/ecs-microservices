@@ -423,6 +423,5 @@ The `production` environment requires:
 5. After review and approval, merge to `main`
 6. Deployment to production happens automatically (with approval)
 
-## License
 
-[Add your license here]
+Author: Artur Martirosyan
