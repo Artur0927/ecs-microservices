@@ -35,6 +35,41 @@ resource "aws_iam_role_policy_attachment" "github_build_ecr" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
+# S3 and DynamoDB permissions for Terraform state access (read-only for plan)
+resource "aws_iam_policy" "github_build_terraform_state" {
+  name        = "github-actions-build-terraform-state-policy"
+  description = "Read-only access to Terraform state backend for CI plan operations"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = "s3:ListBucket"
+        Effect   = "Allow"
+        Resource = "arn:aws:s3:::ecs-terraform-state-c042820c"
+      },
+      {
+        Action   = "s3:GetObject"
+        Effect   = "Allow"
+        Resource = "arn:aws:s3:::ecs-terraform-state-c042820c/ecs-microservices/prod/terraform.tfstate"
+      },
+      {
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:DescribeTable"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:dynamodb:us-east-1:577713924485:table/terraform-locks"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "github_build_terraform_state" {
+  role       = aws_iam_role.github_build.name
+  policy_arn = aws_iam_policy.github_build_terraform_state.arn
+}
+
 # -----------------------------------------------------------------------------
 # Role 2: Deploy (For Image Push & ECS Updates)
 # Trust Policy: RESTRICTED to refs/heads/main only
@@ -85,7 +120,7 @@ resource "aws_iam_policy" "github_deploy_least_privilege" {
           "ecr:UploadLayerPart",
           "ecr:CompleteLayerUpload"
         ]
-        Effect   = "Allow"
+        Effect = "Allow"
         Resource = [
           aws_ecr_repository.backend.arn,
           aws_ecr_repository.frontend.arn
@@ -97,7 +132,7 @@ resource "aws_iam_policy" "github_deploy_least_privilege" {
           "ecs:UpdateService",
           "ecs:DescribeServices"
         ]
-        Effect   = "Allow"
+        Effect = "Allow"
         Resource = [
           aws_ecs_service.backend.id,
           aws_ecs_service.frontend.id
