@@ -91,22 +91,10 @@ resource "aws_iam_role" "github_deploy" {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:Artur0927/ecs-microservices:ref:refs/heads/main"
-          }
-        }
-      },
-      {
-        Action = "sts:AssumeRoleWithWebIdentity"
-        Effect = "Allow"
-        Principal = {
-          Federated = aws_iam_openid_connect_provider.github.arn
-        }
-        Condition = {
-          StringEquals = {
-            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          }
-          StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:Artur0927/ecs-microservices:environment:production"
+            "token.actions.githubusercontent.com:sub" = [
+              "repo:Artur0927/ecs-microservices:ref:refs/heads/main",
+              "repo:Artur0927/ecs-microservices:environment:production"
+            ]
           }
         }
       }

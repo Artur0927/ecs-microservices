@@ -9,7 +9,6 @@ on:
       - main
 
 permissions:
-  id-token: write
   contents: read
 
 env:
@@ -25,11 +24,44 @@ jobs:
   build-and-push:
     name: Build and Push Images
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     environment:
       name: production
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Debug OIDC Claims (safe)
+        run: |
+          echo "=== OIDC Token Claims (safe debug) ==="
+          echo "Requesting OIDC token to inspect claims..."
+          TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value // empty')
+          if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ]; then
+            PAYLOAD=$(echo "$TOKEN" | cut -d'.' -f2)
+            if [ -n "$PAYLOAD" ]; then
+              # Add padding if needed for base64 decode
+              case $((${#PAYLOAD} % 4)) in
+                2) PAYLOAD="${PAYLOAD}==" ;;
+                3) PAYLOAD="${PAYLOAD}=" ;;
+              esac
+              DECODED=$(echo "$PAYLOAD" | base64 -d 2>/dev/null || echo "")
+              if [ -n "$DECODED" ]; then
+                echo "sub: $(echo "$DECODED" | jq -r '.sub // "N/A"')"
+                echo "aud: $(echo "$DECODED" | jq -r '.aud // "N/A"')"
+                echo "iss: $(echo "$DECODED" | jq -r '.iss // "N/A"')"
+              else
+                echo "Warning: Could not decode token payload"
+              fi
+            else
+              echo "Warning: Could not extract payload from token"
+            fi
+          else
+            echo "Warning: Could not retrieve OIDC token"
+          fi
+          echo "======================================"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -70,9 +102,45 @@ jobs:
     name: Deploy to ECS
     runs-on: ubuntu-latest
     needs: build-and-push
+    permissions:
+      id-token: write
+      contents: read
     environment:
       name: production
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Debug OIDC Claims (safe)
+        run: |
+          echo "=== OIDC Token Claims (safe debug) ==="
+          echo "Requesting OIDC token to inspect claims..."
+          TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value // empty')
+          if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ]; then
+            PAYLOAD=$(echo "$TOKEN" | cut -d'.' -f2)
+            if [ -n "$PAYLOAD" ]; then
+              # Add padding if needed for base64 decode
+              case $((${#PAYLOAD} % 4)) in
+                2) PAYLOAD="${PAYLOAD}==" ;;
+                3) PAYLOAD="${PAYLOAD}=" ;;
+              esac
+              DECODED=$(echo "$PAYLOAD" | base64 -d 2>/dev/null || echo "")
+              if [ -n "$DECODED" ]; then
+                echo "sub: $(echo "$DECODED" | jq -r '.sub // "N/A"')"
+                echo "aud: $(echo "$DECODED" | jq -r '.aud // "N/A"')"
+                echo "iss: $(echo "$DECODED" | jq -r '.iss // "N/A"')"
+              else
+                echo "Warning: Could not decode token payload"
+              fi
+            else
+              echo "Warning: Could not extract payload from token"
+            fi
+          else
+            echo "Warning: Could not retrieve OIDC token"
+          fi
+          echo "======================================"
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
