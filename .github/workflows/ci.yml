@@ -1,9 +1,16 @@
-name: Production Deploy
+name: CI
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
 
 env:
   AWS_REGION: us-east-1
@@ -12,10 +19,11 @@ env:
   ECS_CLUSTER: ecs-cluster
   ECS_BACKEND_SERVICE: ecs-backend-service
   ECS_FRONTEND_SERVICE: ecs-frontend-service
+  ROLE_TO_ASSUME: arn:aws:iam::577713924485:role/github-actions-role
 
 jobs:
-  deploy:
-    name: Build and Deploy
+  build-and-deploy:
+    name: Build & Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -24,8 +32,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
@@ -35,29 +42,33 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and Push Backend
+      # Build (and push if main)
+      - name: Build Backend
         uses: docker/build-push-action@v5
         with:
           context: ./backend
-          push: true
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_BACKEND_NAME }}:latest
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_BACKEND_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and Push Frontend
+      # Build (and push if main)
+      - name: Build Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
-          push: true
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_FRONTEND_NAME }}:latest
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_FRONTEND_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # Deploy (only if main)
       - name: Force ECS Deployment
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_BACKEND_SERVICE }} --force-new-deployment
           aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_FRONTEND_SERVICE }} --force-new-deployment
