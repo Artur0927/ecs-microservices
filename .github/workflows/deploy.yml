@@ -7,6 +7,13 @@ on:
   push:
     branches:
       - main
+    # Skip deployment for documentation-only changes
+    # This prevents unnecessary deployments when only README, docs, or workflow files change
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/**'
 
 permissions:
   contents: read

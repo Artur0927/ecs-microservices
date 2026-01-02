@@ -141,6 +141,14 @@ Three GitHub Actions workflows manage the development and deployment lifecycle:
 
 **Trigger**: Push to `main` branch
 
+**Path Filtering**: Deployment is skipped for documentation-only changes:
+- `README.md`
+- `docs/**`
+- `**/*.md`
+- `.github/**`
+
+The workflow only runs when application code (`backend/`, `frontend/`) or infrastructure code (`terraform/`) changes, preventing unnecessary deployments for documentation updates.
+
 **Jobs**:
 - **Build and Push**: Builds Docker images, tags with `latest` and `git-sha`, pushes to ECR
 - **Deploy**: Updates ECS services, waits for stabilization
