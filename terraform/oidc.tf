@@ -4,9 +4,6 @@ resource "aws_iam_openid_connect_provider" "github" {
   thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1", "1c58a3a8518e8759bf075b76b750d4f2df264fcd"]
 }
 
-# Get AWS account ID for IAM policy resource ARNs
-data "aws_caller_identity" "current" {}
-
 # -----------------------------------------------------------------------------
 # Role 1: Build / Read-Only (For CI Checks)
 # Trust Policy: Allows any branch/PR in the repo
