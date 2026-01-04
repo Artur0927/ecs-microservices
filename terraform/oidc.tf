@@ -4,7 +4,7 @@ resource "aws_iam_openid_connect_provider" "github" {
   thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1", "1c58a3a8518e8759bf075b76b750d4f2df264fcd"]
 }
 
-# Get AWS account ID for IAM policy resources
+# Get AWS account ID for IAM policy resource ARNs
 data "aws_caller_identity" "current" {}
 
 # -----------------------------------------------------------------------------
@@ -136,8 +136,8 @@ resource "aws_iam_policy" "github_deploy_least_privilege" {
         ]
       },
       # ECS: Describe and Register Task Definitions
-      # The workflow uses task families: ecs-backend-task and ecs-frontend-task
-      # Note: * at the end allows all revisions of the task definition family
+      # Required for: aws ecs describe-task-definition and aws ecs register-task-definition
+      # Task definition families: ecs-backend-task, ecs-frontend-task (from workflow env vars)
       {
         Action = [
           "ecs:DescribeTaskDefinition",
@@ -167,7 +167,7 @@ resource "aws_iam_policy" "github_deploy_least_privilege" {
         Effect   = "Allow"
         Resource = aws_ecs_cluster.main.arn
       },
-      # ECS: Describe Tasks (recommended for deployment monitoring)
+      # ECS: Describe Tasks (required for aws ecs wait services-stable)
       {
         Action   = "ecs:DescribeTasks"
         Effect   = "Allow"
