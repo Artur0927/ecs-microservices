@@ -1,6 +1,10 @@
 # AWS ECS Microservices Infrastructure
 
-![License](https://img.shields.io/github/license/Artur0927/ecs-microservices)
+![CI/CD](https://img.shields.io/github/actions/workflow/status/Artur0927/ecs-microservices/ci.yml?branch=main&label=CI%2FCD&logo=github)
+![License](https://img.shields.io/github/license/Artur0927/ecs-microservices?logo=github)
+![Terraform](https://img.shields.io/badge/terraform-1.6.0+-623ce4?logo=terraform&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-ECS%20Fargate-FF9900?logo=amazon-aws&logoColor=white)
+![Python](https://img.shields.io/badge/python-3.9+-3776AB?logo=python&logoColor=white)
 
 A production-grade microservices architecture on AWS ECS Fargate with Infrastructure as Code (Terraform) and automated CI/CD pipelines using GitHub Actions.
 
