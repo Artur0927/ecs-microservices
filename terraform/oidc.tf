@@ -132,20 +132,6 @@ resource "aws_iam_policy" "github_deploy_least_privilege" {
           aws_ecr_repository.frontend.arn
         ]
       },
-      # ECS: Describe and Register Task Definitions
-      # Required for: aws ecs describe-task-definition and aws ecs register-task-definition
-      # Task definition families: ecs-backend-task, ecs-frontend-task (from workflow env vars)
-      {
-        Action = [
-          "ecs:DescribeTaskDefinition",
-          "ecs:RegisterTaskDefinition"
-        ]
-        Effect = "Allow"
-        Resource = [
-          "arn:aws:ecs:${var.region}:${data.aws_caller_identity.current.account_id}:task-definition/ecs-backend-task:*",
-          "arn:aws:ecs:${var.region}:${data.aws_caller_identity.current.account_id}:task-definition/ecs-frontend-task:*"
-        ]
-      },
       # ECS: Update services
       {
         Action = [
@@ -163,12 +149,6 @@ resource "aws_iam_policy" "github_deploy_least_privilege" {
         Action   = "ecs:DescribeClusters"
         Effect   = "Allow"
         Resource = aws_ecs_cluster.main.arn
-      },
-      # ECS: Describe Tasks (required for aws ecs wait services-stable)
-      {
-        Action   = "ecs:DescribeTasks"
-        Effect   = "Allow"
-        Resource = "arn:aws:ecs:${var.region}:${data.aws_caller_identity.current.account_id}:task/${aws_ecs_cluster.main.name}/*"
       },
       # IAM: PassRole to ECS Task Execution Role
       {
