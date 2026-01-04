@@ -180,6 +180,17 @@ The CI/CD pipeline uses OIDC (OpenID Connect) for AWS authentication—no static
 
 ## Terraform
 
+### Deactivating the Project to Save AWS Credits
+
+To stop AWS charges, you can destroy all infrastructure:
+
+```bash
+cd terraform
+terraform destroy
+```
+
+For detailed instructions and options (including scaling down vs. full destruction), see [`terraform/DESTROY.md`](terraform/DESTROY.md).
+
 ### State Management
 
 Terraform state is stored in S3 with DynamoDB locking:
