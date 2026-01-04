@@ -4,6 +4,9 @@ resource "aws_iam_openid_connect_provider" "github" {
   thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1", "1c58a3a8518e8759bf075b76b750d4f2df264fcd"]
 }
 
+# Get AWS account ID for IAM policy resources
+data "aws_caller_identity" "current" {}
+
 # -----------------------------------------------------------------------------
 # Role 1: Build / Read-Only (For CI Checks)
 # Trust Policy: Allows any branch/PR in the repo
@@ -132,6 +135,20 @@ resource "aws_iam_policy" "github_deploy_least_privilege" {
           aws_ecr_repository.frontend.arn
         ]
       },
+      # ECS: Describe and Register Task Definitions
+      # The workflow uses task families: ecs-backend-task and ecs-frontend-task
+      # Note: * at the end allows all revisions of the task definition family
+      {
+        Action = [
+          "ecs:DescribeTaskDefinition",
+          "ecs:RegisterTaskDefinition"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:ecs:${var.region}:${data.aws_caller_identity.current.account_id}:task-definition/ecs-backend-task:*",
+          "arn:aws:ecs:${var.region}:${data.aws_caller_identity.current.account_id}:task-definition/ecs-frontend-task:*"
+        ]
+      },
       # ECS: Update services
       {
         Action = [
@@ -149,6 +166,12 @@ resource "aws_iam_policy" "github_deploy_least_privilege" {
         Action   = "ecs:DescribeClusters"
         Effect   = "Allow"
         Resource = aws_ecs_cluster.main.arn
+      },
+      # ECS: Describe Tasks (recommended for deployment monitoring)
+      {
+        Action   = "ecs:DescribeTasks"
+        Effect   = "Allow"
+        Resource = "arn:aws:ecs:${var.region}:${data.aws_caller_identity.current.account_id}:task/${aws_ecs_cluster.main.name}/*"
       },
       # IAM: PassRole to ECS Task Execution Role
       {
