@@ -1,5 +1,7 @@
 # AWS ECS Microservices Infrastructure
 
+![License](https://img.shields.io/github/license/Artur0927/ecs-microservices)
+
 A production-grade microservices architecture on AWS ECS Fargate with Infrastructure as Code (Terraform) and automated CI/CD pipelines using GitHub Actions.
 
 **Author:** Artur Martirosyan
