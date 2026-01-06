@@ -81,7 +81,7 @@ git ls-remote --heads origin | grep -i copilot
 # Expected: No output
 
 # Search repository for Copilot mentions
-grep -ri "copilot\|coding.agent\|github copilot" \
+grep -ri "copilot\|coding agent\|github copilot" \
   --include="*.md" --include="*.yml" --include="*.yaml" \
   --include="*.py" --include="*.js" --include="*.html" .
 # Expected: No matches (except this file)
