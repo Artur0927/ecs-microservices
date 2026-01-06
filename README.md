@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> **Infrastructure Status: OFFLINE** — The live AWS infrastructure has been intentionally shut down to conserve cloud credits. All code, Terraform configurations, and CI/CD pipelines remain fully functional and can be deployed at any time using `terraform apply`.
+
 # AWS ECS Microservices Infrastructure
 
 ![CI/CD](https://img.shields.io/github/actions/workflow/status/Artur0927/ecs-microservices/ci.yml?branch=main&label=CI%2FCD&logo=github)
