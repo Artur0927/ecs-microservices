@@ -385,6 +385,4 @@ The `production` environment requires:
    - Modify Terraform files
    - Use GitHub Actions workflow with "Run Terraform Apply" to apply changes (requires approval)
 
-## License
-
-[Add your license here]
+Author:** Artur Martirosyan
